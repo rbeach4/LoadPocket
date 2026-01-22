@@ -13,9 +13,11 @@ export class CarriersService {
     });
   }
 
-  findAll() {
+  findAll(skip = 0, take = 50) {
     return this.prisma.carrier.findMany({
       where: { active: true },
+      skip,
+      take,
     });
   }
 

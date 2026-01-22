@@ -13,9 +13,11 @@ export class CustomersService {
     });
   }
 
-  findAll() {
+  findAll(skip = 0, take = 50) {
     return this.prisma.customer.findMany({
       where: { active: true },
+      skip,
+      take,
     });
   }
 

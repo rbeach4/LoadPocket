@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from '@loadpocket/prisma';
 import { QueuesModule } from '@loadpocket/queues';
 
@@ -14,11 +15,29 @@ import { DocumentsModule } from './documents/documents.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ReportsModule } from './reports/reports.module';
 import { JobsModule } from './jobs/jobs.module';
+import { BullBoardModule } from './bull-board/bull-board.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: process.env.NODE_ENV !== 'production'
+          ? {
+              target: 'pino-pretty',
+              options: {
+                colorize: true,
+                singleLine: true,
+                translateTime: 'SYS:standard',
+              },
+            }
+          : undefined,
+        level: process.env.LOG_LEVEL || 'info',
+        autoLogging: true,
+        redact: ['req.headers.authorization', 'req.body.password'],
+      },
     }),
     PrismaModule,
     QueuesModule,
@@ -31,6 +50,7 @@ import { JobsModule } from './jobs/jobs.module';
     InvoicesModule,
     ReportsModule,
     JobsModule,
+    BullBoardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

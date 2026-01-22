@@ -14,7 +14,7 @@ export class InvoicesService {
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {
-    const invoiceNumber = await this.generateInvoiceNumber();
+    const invoiceNumber = this.generateInvoiceNumber();
     
     const invoice = await this.prisma.invoice.create({
       data: {
@@ -28,9 +28,9 @@ export class InvoicesService {
       },
     });
 
-    // Queue email to customer
+    // Queue email to customer (fire-and-forget, don't block response)
     if (invoice.customer.email) {
-      await this.emailQueue.add('send-invoice', {
+      this.emailQueue.add('send-invoice', {
         invoiceId: invoice.id,
         email: invoice.customer.email,
       });
@@ -39,7 +39,7 @@ export class InvoicesService {
     return invoice;
   }
 
-  findAll(status?: InvoiceStatus) {
+  findAll(status?: InvoiceStatus, skip = 0, take = 50) {
     return this.prisma.invoice.findMany({
       where: status ? { status } : undefined,
       include: {
@@ -47,6 +47,8 @@ export class InvoicesService {
         load: true,
       },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take,
     });
   }
 
@@ -84,9 +86,9 @@ export class InvoicesService {
     });
   }
 
-  private async generateInvoiceNumber(): Promise<string> {
-    const count = await this.prisma.invoice.count();
-    const padded = String(count + 1).padStart(6, '0');
-    return `INV-${padded}`;
+  private generateInvoiceNumber(): string {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `INV-${timestamp}-${random}`;
   }
 }
