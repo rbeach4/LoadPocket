@@ -1,26 +1,47 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@loadpocket/prisma';
 import { CreateCarrierDto } from './dto/create-carrier.dto';
 import { UpdateCarrierDto } from './dto/update-carrier.dto';
 
 @Injectable()
 export class CarriersService {
+  constructor(private prisma: PrismaService) {}
+
   create(createCarrierDto: CreateCarrierDto) {
-    return 'This action adds a new carrier';
+    return this.prisma.carrier.create({
+      data: createCarrierDto,
+    });
   }
 
   findAll() {
-    return `This action returns all carriers`;
+    return this.prisma.carrier.findMany({
+      where: { active: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} carrier`;
+  findOne(id: string) {
+    return this.prisma.carrier.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, updateCarrierDto: UpdateCarrierDto) {
-    return `This action updates a #${id} carrier`;
+  findByMcNumber(mcNumber: string) {
+    return this.prisma.carrier.findUnique({
+      where: { mcNumber },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} carrier`;
+  update(id: string, updateCarrierDto: UpdateCarrierDto) {
+    return this.prisma.carrier.update({
+      where: { id },
+      data: updateCarrierDto,
+    });
+  }
+
+  remove(id: string) {
+    return this.prisma.carrier.update({
+      where: { id },
+      data: { active: false },
+    });
   }
 }
