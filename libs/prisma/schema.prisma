@@ -36,15 +36,17 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String
-  firstName String
-  lastName  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
   role      UserRole @default(DISPATCHER)
   active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   loads     Load[]
   invoices  Invoice[]
+
+  @@map("users")
 }
 
 model Customer {
@@ -56,60 +58,64 @@ model Customer {
   city         String?
   state        String?
   zip          String?
-  contactName  String?
+  contactName  String?  @map("contact_name")
   notes        String?
-  creditLimit  Decimal? @db.Decimal(10, 2)
-  paymentTerms Int      @default(30)
+  creditLimit  Decimal? @db.Decimal(10, 2) @map("credit_limit")
+  paymentTerms Int      @default(30) @map("payment_terms")
   active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   loads    Load[]
   invoices Invoice[]
+
+  @@map("customers")
 }
 
 model Carrier {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
-  mcNumber      String?  @unique
-  dotNumber     String?  @unique
+  mcNumber      String?   @unique @map("mc_number")
+  dotNumber     String?   @unique @map("dot_number")
   email         String?
   phone         String?
   address       String?
   city          String?
   state         String?
   zip           String?
-  contactName   String?
+  contactName   String?   @map("contact_name")
   notes         String?
-  insuranceExp  DateTime?
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  insuranceExp  DateTime? @map("insurance_exp")
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   loads Load[]
+
+  @@map("carriers")
 }
 
 model Load {
   id              String     @id @default(cuid())
-  loadNumber      String     @unique
+  loadNumber      String     @unique @map("load_number")
   status          LoadStatus @default(QUOTED)
   
-  originAddress   String
-  originCity      String
-  originState     String
-  originZip       String
-  pickupDate      DateTime?
-  pickupTime      String?
+  originAddress   String     @map("origin_address")
+  originCity      String     @map("origin_city")
+  originState     String     @map("origin_state")
+  originZip       String     @map("origin_zip")
+  pickupDate      DateTime?  @map("pickup_date")
+  pickupTime      String?    @map("pickup_time")
   
-  destAddress     String
-  destCity        String
-  destState       String
-  destZip         String
-  deliveryDate    DateTime?
-  deliveryTime    String?
+  destAddress     String     @map("dest_address")
+  destCity        String     @map("dest_city")
+  destState       String     @map("dest_state")
+  destZip         String     @map("dest_zip")
+  deliveryDate    DateTime?  @map("delivery_date")
+  deliveryTime    String?    @map("delivery_time")
   
-  customerRate    Decimal    @db.Decimal(10, 2)
-  carrierRate     Decimal    @db.Decimal(10, 2)
+  customerRate    Decimal    @db.Decimal(10, 2) @map("customer_rate")
+  carrierRate     Decimal    @db.Decimal(10, 2) @map("carrier_rate")
   margin          Decimal    @db.Decimal(10, 2)
   
   weight          Decimal?   @db.Decimal(10, 2)
@@ -118,20 +124,22 @@ model Load {
   equipment       String?
   notes           String?
   
-  customerId      String
+  customerId      String     @map("customer_id")
   customer        Customer   @relation(fields: [customerId], references: [id])
   
-  carrierId       String?
+  carrierId       String?    @map("carrier_id")
   carrier         Carrier?   @relation(fields: [carrierId], references: [id])
   
-  dispatcherId    String?
+  dispatcherId    String?    @map("dispatcher_id")
   dispatcher      User?      @relation(fields: [dispatcherId], references: [id])
   
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
 
   documents Document[]
   invoice   Invoice?
+
+  @@map("loads")
 }
 
 model Document {
@@ -139,30 +147,34 @@ model Document {
   name      String
   type      String
   url       String
-  loadId    String
+  loadId    String   @map("load_id")
   load      Load     @relation(fields: [loadId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("documents")
 }
 
 model Invoice {
   id            String        @id @default(cuid())
-  invoiceNumber String        @unique
+  invoiceNumber String        @unique @map("invoice_number")
   status        InvoiceStatus @default(DRAFT)
   amount        Decimal       @db.Decimal(10, 2)
-  dueDate       DateTime
-  paidDate      DateTime?
+  dueDate       DateTime      @map("due_date")
+  paidDate      DateTime?     @map("paid_date")
   notes         String?
   
-  customerId    String
+  customerId    String        @map("customer_id")
   customer      Customer      @relation(fields: [customerId], references: [id])
   
-  loadId        String        @unique
+  loadId        String        @unique @map("load_id")
   load          Load          @relation(fields: [loadId], references: [id])
   
-  createdById   String
+  createdById   String        @map("created_by_id")
   createdBy     User          @relation(fields: [createdById], references: [id])
   
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@map("invoices")
 }
