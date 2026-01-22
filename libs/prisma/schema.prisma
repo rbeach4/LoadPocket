@@ -4,4 +4,165 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  DISPATCHER
+  ACCOUNTING
+}
+
+enum LoadStatus {
+  QUOTED
+  BOOKED
+  DISPATCHED
+  IN_TRANSIT
+  DELIVERED
+  INVOICED
+  PAID
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  VOID
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(DISPATCHER)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  loads     Load[]
+  invoices  Invoice[]
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  state        String?
+  zip          String?
+  contactName  String?
+  notes        String?
+  creditLimit  Decimal? @db.Decimal(10, 2)
+  paymentTerms Int      @default(30)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  loads    Load[]
+  invoices Invoice[]
+}
+
+model Carrier {
+  id            String   @id @default(cuid())
+  name          String
+  mcNumber      String?  @unique
+  dotNumber     String?  @unique
+  email         String?
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zip           String?
+  contactName   String?
+  notes         String?
+  insuranceExp  DateTime?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  loads Load[]
+}
+
+model Load {
+  id              String     @id @default(cuid())
+  loadNumber      String     @unique
+  status          LoadStatus @default(QUOTED)
+  
+  originAddress   String
+  originCity      String
+  originState     String
+  originZip       String
+  pickupDate      DateTime?
+  pickupTime      String?
+  
+  destAddress     String
+  destCity        String
+  destState       String
+  destZip         String
+  deliveryDate    DateTime?
+  deliveryTime    String?
+  
+  customerRate    Decimal    @db.Decimal(10, 2)
+  carrierRate     Decimal    @db.Decimal(10, 2)
+  margin          Decimal    @db.Decimal(10, 2)
+  
+  weight          Decimal?   @db.Decimal(10, 2)
+  pieces          Int?
+  commodity       String?
+  equipment       String?
+  notes           String?
+  
+  customerId      String
+  customer        Customer   @relation(fields: [customerId], references: [id])
+  
+  carrierId       String?
+  carrier         Carrier?   @relation(fields: [carrierId], references: [id])
+  
+  dispatcherId    String?
+  dispatcher      User?      @relation(fields: [dispatcherId], references: [id])
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  documents Document[]
+  invoice   Invoice?
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  url       String
+  loadId    String
+  load      Load     @relation(fields: [loadId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  amount        Decimal       @db.Decimal(10, 2)
+  dueDate       DateTime
+  paidDate      DateTime?
+  notes         String?
+  
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  
+  loadId        String        @unique
+  load          Load          @relation(fields: [loadId], references: [id])
+  
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
