@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from '@loadpocket/prisma';
+import { QueuesModule } from '@loadpocket/queues';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from '@loadpocket/prisma';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CustomersModule } from './customers/customers.module';
@@ -10,10 +13,15 @@ import { LoadsModule } from './loads/loads.module';
 import { DocumentsModule } from './documents/documents.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ReportsModule } from './reports/reports.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     PrismaModule,
+    QueuesModule,
     AuthModule,
     UsersModule,
     CustomersModule,
@@ -22,6 +30,7 @@ import { ReportsModule } from './reports/reports.module';
     DocumentsModule,
     InvoicesModule,
     ReportsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

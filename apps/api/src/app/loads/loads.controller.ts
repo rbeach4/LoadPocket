@@ -7,7 +7,10 @@ import { UpdateLoadDto } from './dto/update-load.dto';
 
 @ApiTags('loads')
 @ApiBearerAuth()
-@Controller('loads')
+@Controller({
+  path: 'loads',
+  version: '1',
+})
 export class LoadsController {
   constructor(private readonly loadsService: LoadsService) {}
 

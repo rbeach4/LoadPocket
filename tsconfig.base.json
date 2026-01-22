@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@loadpocket/prisma": ["libs/prisma/src/index.ts"]
+      "@loadpocket/prisma": ["libs/prisma/src/index.ts"],
+      "@loadpocket/queues": ["libs/queues/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
