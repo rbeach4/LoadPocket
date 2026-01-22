@@ -27,16 +27,16 @@ export class CarriersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.carriersService.findOne(+id);
+    return this.carriersService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCarrierDto: UpdateCarrierDto) {
-    return this.carriersService.update(+id, updateCarrierDto);
+    return this.carriersService.update(id, updateCarrierDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.carriersService.remove(+id);
+    return this.carriersService.remove(id);
   }
 }

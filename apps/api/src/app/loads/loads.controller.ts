@@ -27,16 +27,16 @@ export class LoadsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.loadsService.findOne(+id);
+    return this.loadsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLoadDto: UpdateLoadDto) {
-    return this.loadsService.update(+id, updateLoadDto);
+    return this.loadsService.update(id, updateLoadDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.loadsService.remove(+id);
+    return this.loadsService.remove(id);
   }
 }
